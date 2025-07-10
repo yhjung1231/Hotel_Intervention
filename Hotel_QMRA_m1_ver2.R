@@ -29,18 +29,18 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   #-------------------------------------------------------
   # Step 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
-  surf1 <- sequence[1]
+  surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
-  TE.sh1 <- if (scenario == "I1" & surf1 == "Elevator") TE.h_fil 
+  TE.sh1 <- if (scenario == "I1") TE.h_fil 
             else param1$TE.sh
   
-  TE.hs1 <- if (scenario == "I1" & surf1 == "Elevator") TE.fil_h 
+  TE.hs1 <- if (scenario == "I1") TE.fil_h 
             else param1$TE.hs
   
   # Surface inactivation rate
-  k.surf <- if (scenario == "I1" & surf1 == "Elevator") k.surf.cu else param1$k.surf
+  k.surf <- if (scenario == "I1") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
   LR.factor <- if (scenario == "I2") LR.S else 1
