@@ -513,8 +513,6 @@ spear.anal_TT<-cor(spear.m1_TT,method="spearman")
 
 View(spear.anal_TT)
 
-
-
 # Save as Excel file 
 library(openxlsx)
 
@@ -523,4 +521,52 @@ sheets_list <-list (Elevator = spear.anal_E,
                     Tabletop = spear.anal_TT)
 
 write.xlsx(sheets_list, file="Sensitivity.xlsx", rowNames=TRUE)
+
+
+#Top five parameter 
+
+## Helper function: Top 5 parameter extraction
+
+get_top5_vars<- function(corr_matrix, scenario_name){
+  vec <-corr_matrix["risk_vec",]
+  vec <-vec[names(vec) != "risk_vec"] #exclude "risk_vec"
+  top_vars <- sort(abs(vec), decreasing = TRUE)[1:5]
+  
+  df <-data.frame (
+    variable = names(top_vars),
+    abs_corr = as.numeric(top_vars),
+    scenario = scenario_name
+  )
+  return(df)
+}
+
+#pull out top5 parameters extraction 
+top5_elevator <- get_top5_vars(spear.anal_E, "Elevator")
+top5_frontdesk <- get_top5_vars(spear.anal_FD, "Frontdesk")
+top5_table <-get_top5_vars(spear.anal_TT, "Table")
+
+#Combine
+top5_all <-rbind(top5_elevator, top5_frontdesk, top5_table)
+
+# make bar graph ("Top 5 Most Influential Parameters by Scenario")
+library (ggplot2)
+
+p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
+  geom_bar (stat="identity", position = position_dodge(width=0.9))+
+  coord_flip()+
+  facet_wrap(~scenario, scales="free")+
+  labs(x= "Parameter", y="Correlation Strength (|ρ|)")+
+  theme_minimal(base_size=14)
+
+p1
+
+ggsave("Top5 parameters.tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
+
+p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
+  geom_bar (stat="identity", position = position_dodge(width=0.9))+
+  coord_flip()+
+  labs(x= "Parameter", y="Spearman Correlation (|rho|)")+
+  theme_minimal(base_size=14)
+
+p2
 
