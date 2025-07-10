@@ -33,9 +33,8 @@ docs/
 po/*~
 # RStudio Connect folder
 rsconnect/
+# Result saving folder
+Result/
 # Big figure files
 .tiff
 .jpeg
-# Result saving folder
-Result/
-Top5 parameters.tiff
