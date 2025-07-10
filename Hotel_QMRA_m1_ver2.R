@@ -322,7 +322,7 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
   #-------------------------------------------------------
   # Step 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
-  surf1 <- sequence[1]
+  surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
