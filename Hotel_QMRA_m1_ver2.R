@@ -459,9 +459,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea, Sample.surfarea )
-                     
+spear.m1_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+                     #, Conc.recover, Sample.surfarea, T.surfarea
   
   
 spear.anal_E<-cor(spear.m1_E,method="spearman")
@@ -481,8 +481,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea, Sample.surfarea )
+spear.m1_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+#, Conc.recover, Sample.surfarea, T.surfarea
 
 
 
@@ -490,10 +491,10 @@ spear.anal_FD<-cor(spear.m1_FD,method="spearman")
 
 View(spear.anal_FD)
 
-#TableTop touch parameters
+#Tabletop touch parameters
 param <- get_surface_params("Table", iter = 10000)
 
-T.surfarea <- rep(param$T.surfarea, length(risk_vec))
+T.surfarea <- param$T.surfarea
 Sample.surfarea <-rep(param$Sample.surfarea, length(risk_vec))
 Frac.hs<-param$Frac.hs
 Conc.recover<-param$Conc.recover
@@ -503,11 +504,12 @@ k.surf<-param$k.surf
 
 
 spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea, Sample.surfarea )
-
-
+                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
+#, Sample.surfarea
 
 spear.anal_TT<-cor(spear.m1_TT,method="spearman")
+
+#spear.anal_TT<-rcorr(as.matrix(spear.m1_TT), type="spearman")
 
 View(spear.anal_TT)
 
