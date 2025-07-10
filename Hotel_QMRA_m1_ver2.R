@@ -560,7 +560,7 @@ p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
 
 p1
 
-ggsave("Top5 parameters.tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
+ggsave("Top5 parameters.tiff", dpi=600, dev= 'tiff', height=6, width=12, units='in')
 
 p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
   geom_bar (stat="identity", position = position_dodge(width=0.9))+
