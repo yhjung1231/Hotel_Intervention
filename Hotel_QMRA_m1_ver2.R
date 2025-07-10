@@ -223,7 +223,7 @@ risk_df <- prepare_risk_plot_data(results)
 windows()
 plot_risk_violin(risk_df)
 
-ggsave("Infection risk_m1_total.tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
+ggsave("Infection risk_m1_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
 
   # Filter only rows where Sequence == "E"
 risk_df_E <- risk_df %>% filter(Sequence=="E")
@@ -232,7 +232,7 @@ risk_df_E <- risk_df %>% filter(Sequence=="E")
 windows()
 plot_risk_violin_1(risk_df_E)
 
-ggsave("Infection risk_m1_E (HHC included).tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
+ggsave("Infection risk_m1_E (HHC).tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
 
 
 #==============================================================

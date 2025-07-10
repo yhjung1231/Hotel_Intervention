@@ -51,3 +51,6 @@ rsconnect/
 # Big figure files 
 .tiff
 .jpeg
+
+# Result saving folder
+Result/
