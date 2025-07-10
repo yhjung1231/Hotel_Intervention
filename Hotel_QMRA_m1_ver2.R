@@ -8,14 +8,14 @@ source("Hotel_Parameters_ver2.R")
 ## Baseline - no intervention 
 ## I1: Using Antimicrobial film on the elevator button (Engineering control)
 ## I2: Targeted Hygiene on the elevator button (Administrative 1)
-## I3: Using hand gloves (PPE)
+## I3: Using hand gloves - susceptible only (PPE)
 ## I4, 6, 8: Using hand sanitizer after touching elevator button - susceptible guest (Administrative 2)
 ## I5, 7, 9: Using hand sanitizer before touching elevator button - infected guest (Engineering 2- source control)
 
 ### I4,5 - P_HS:0.12/ I6,7 - P_HS:0.2/ I8,9- P_HS: 0.48
 
 
-# Step 1: Main function refactoring 
+# Step 1: Main function for touch sequence 
 run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   
   numevents <- length(sequence) + 1  # +1 for face touch at the end
@@ -33,12 +33,10 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
-  TE.sh1 <- if (scenario == "I3") param1$TE.sh * hand_glove 
-            else if (scenario == "I1" & surf1 == "Elevator") TE.h_fil 
+  TE.sh1 <- if (scenario == "I1" & surf1 == "Elevator") TE.h_fil 
             else param1$TE.sh
   
-  TE.hs1 <- if (scenario == "I3") param1$TE.hs * hand_glove 
-            else if (scenario == "I1" & surf1 == "Elevator") TE.fil_h 
+  TE.hs1 <- if (scenario == "I1" & surf1 == "Elevator") TE.fil_h 
             else param1$TE.hs
   
   # Surface inactivation rate
@@ -328,9 +326,9 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
-  TE.sh1 <- TE.h_fil* hand_glove 
+  TE.sh1 <- TE.h_fil 
   
-  TE.hs1 <- TE.fil_h* hand_glove
+  TE.hs1 <- TE.fil_h
   
   
   # Surface inactivation rate
