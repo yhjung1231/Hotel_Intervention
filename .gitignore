@@ -37,3 +37,6 @@ rsconnect/
 Result/
 # Big figure files
 .tiff
+Top5 parameters.tiff
+Infection risk_m1_total(HHC).tiff
+Infection risk_m1_E (HHC).tiff
