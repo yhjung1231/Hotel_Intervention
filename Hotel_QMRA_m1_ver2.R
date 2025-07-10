@@ -443,7 +443,7 @@ risk_vec<- all_data_SA$Risk %>%
   filter (event == "Hand to face touch") %>%
   pull (value)
 
-#Sensitivity Analysis---------------------------------------------------(parameter update해야함)
+#Sensitivity Analysis------------------
 
 #Elevator touch parameters
 param <- get_surface_params("Elevator", iter = 10000)
