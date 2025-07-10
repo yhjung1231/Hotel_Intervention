@@ -169,6 +169,7 @@ run_model2_all <- function(iter) {
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(ggbreak)
 
 prepare_risk_plot_data <- function(results) {
   df_list <- list()
@@ -200,11 +201,14 @@ plot_risk_violin <- function(df) {
   ggplot(df, aes(x = Scenario, y = Risk, fill = Scenario)) +
     geom_violin(trim = FALSE, alpha = 0.6) +
     geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
-    facet_wrap(~ Sequence, scales = "fixed") +
+    facet_grid(rows = vars(Sequence), scales = "free_y", switch = "x") +
+    #facet_wrap(~ Sequence , scales = "fixed") +
     scale_y_continuous(
       trans = "log10",
-      labels = scales::scientific,
-      breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
+      labels = scales::scientific
+      #,breaks = c(1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)
+      ) +
+    #scale_y_cut(breaks=c(1e-26, 1e-20))+
     labs(y = "Risk (log10)", x = "Scenario") +
     theme_minimal()
 }
@@ -244,7 +248,7 @@ risk_df_E <- risk_df %>% filter(Sequence=="E")
 windows()
 plot_risk_violin_1(risk_df_E)
 
-ggsave("Infection risk_m1_E (HHC).tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
+ggsave("Infection risk_m2_E (HHC).tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
 
 
 #==============================================================
@@ -312,10 +316,10 @@ summary_Conc_s<-generate_summary_stats(all_data$Conc.s, "Conc.s")
 summary_Dose<-generate_summary_stats(all_data$Dose, "Dose")
 summary_Risk<-generate_summary_stats(all_data$Risk, "Risk")
 
-write.csv(summary_Conc_h, "summary_Conc_h.csv", row.names = FALSE)
-write.csv(summary_Conc_s, "summary_Conc_s.csv", row.names = FALSE)
-write.csv(summary_Dose,   "summary_Dose.csv", row.names = FALSE)
-write.csv(summary_Risk,   "summary_Risk.csv", row.names = FALSE)
+write.csv(summary_Conc_h, "summary_Conc_h_m2.csv", row.names = FALSE)
+write.csv(summary_Conc_s, "summary_Conc_s_m2.csv", row.names = FALSE)
+write.csv(summary_Dose,   "summary_Dose_m2.csv", row.names = FALSE)
+write.csv(summary_Risk,   "summary_Risk_m2.csv", row.names = FALSE)
 
 #============================
 #Step 6: Sensitivity Analysis
