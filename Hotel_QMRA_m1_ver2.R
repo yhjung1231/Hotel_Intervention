@@ -522,5 +522,5 @@ sheets_list <-list (Elevator = spear.anal_E,
                     Frontdesk = spear.anal_FD,
                     Tabletop = spear.anal_TT)
 
-write.xlsx(sheets_list, file="Sensitivity.xlsx")
+write.xlsx(sheets_list, file="Sensitivity.xlsx", rowNames=TRUE)
 
