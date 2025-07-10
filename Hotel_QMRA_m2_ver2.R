@@ -2,7 +2,6 @@
 #Model 2: Susceptible touch surfaces 4hour after an infected guest passes by the hotel lobby
 ###======================================================================================###
 
-
 source("Hotel_Parameters_ver2.R")
 
 # Touch scenario function: loop by the sequence and applying intervention factors
@@ -20,7 +19,7 @@ source("Hotel_Parameters_ver2.R")
 
 
 # Step 1: Main function for touch sequence 
-run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
+run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) {
   
   numevents <- length(sequence) + 1  # +1 for face touch at the end
   eventsname <- c(paste0("suscept touch seq ", seq_along(sequence)), "Hand to face touch")
@@ -33,18 +32,18 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   #-------------------------------------------------------
   # Step 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
-  surf1 <- sequence[1]
+  surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
-  TE.sh1 <- if (scenario == "I1" & surf1 == "Elevator") TE.h_fil 
+  TE.sh1 <- if (scenario == "I1") TE.h_fil 
   else param1$TE.sh
   
-  TE.hs1 <- if (scenario == "I1" & surf1 == "Elevator") TE.fil_h 
+  TE.hs1 <- if (scenario == "I1") TE.fil_h 
   else param1$TE.hs
   
   # Surface inactivation rate
-  k.surf <- if (scenario == "I1" & surf1 == "Elevator") k.surf.cu else param1$k.surf
+  k.surf <- if (scenario == "I1") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
   LR.factor <- if (scenario == "I2") LR.S else 1
@@ -72,12 +71,22 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   # It will be updated with each loop iteration using Conc.h[i, ]
   
   Conc.h.prev <- Conc.h.sus
+  Time.m2<-4*60 #(4 hours)
   
   for (i in seq_along(sequence)) {
     surf <- sequence[i]
     param <- get_surface_params(surf, iter)
-    k.surf <- if (scenario == "I1" & surf == "Elevator") k.surf.cu else param$k.surf
     
+    k.surf <- if (scenario == "I1" & surf == "Elevator") k.surf.cu else param$k.surf
+    Conc.recover <- param$Conc.recover
+    
+
+    #Concentration on each fomite after 4 hours 
+    
+    Conc.4hour<-if (scenario == "I1" && surf == "Elevator")(Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i*exp(-k.surf*Time.m2)
+    else (Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i
+    
+
     # Transfer efficiencies
     TE.sh <- if (scenario == "I3") param$TE.sh * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.h_fil else param$TE.sh
     TE.hs <- if (scenario == "I3") param$TE.hs * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.fil_h else param$TE.hs
@@ -85,22 +94,21 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
     # Hand concentration after touching surface
     Conc.h[i, ] <- Conc.h.prev * exp(-k.hand * Time.m1) - {
       param$Frac.hs * (TE.hs * Conc.h.prev * exp(-k.hand * Time.m1) -
-                         TE.sh * if (i == 1) Conc.surf.i * exp(-k.surf * Time.m1) else 0)
+                         TE.sh * Conc.4hour * exp(-k.surf * Time.m1))
     }
     
-    # Intervention 4, 6, 8: Hand hygiene after first elevator contact (Administrative)
+    # Intervention 4, 6, 8: Hand hygiene after elevator contact (Administrative)
     
-    if (scenario %in% c("I4", "I6", "I8") && i == 1 && surf == "Elevator") {
+    if (scenario %in% c("I4", "I6", "I8") && surf == "Elevator") {
       compliance <-runif(iter) < P_HS
       LR_applied <-ifelse(compliance, LR.HS, 1)
       Conc.h[i, ] <- Conc.h[i, ] / LR_applied
     }
     
     # Surface concentration update
-    Conc.s[i, ] <- if (i == 1) Conc.surf.i * exp(-k.surf * Time.m1) else 0
-    Conc.s[i, ] <- Conc.s[i, ] - {
+    Conc.s[i, ] <- Conc.4hour * exp(-k.surf * Time.m1)- {
       param$Frac.hs * (T.handarea / param$T.surfarea) *
-        (TE.sh * if (i == 1) Conc.surf.i * exp(-k.surf * Time.m1) else 0 -
+        (TE.sh * Conc.4hour * exp(-k.surf * Time.m1) -
            Conc.h.prev * exp(-k.hand * Time.m1))
     }
     
@@ -123,9 +131,9 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
 }
 
 #=============================================================================================
-# Step 2: Model fucntion to pack and run all the scenario in different sequence (sub-scenarios)
+# Step 2: Model function to pack and run all the scenario in different sequence (sub-scenarios)
 #==============================================================================================
-run_model1_all <- function(iter) {
+run_model2_all <- function(iter) {
   
   # scenarios: baseline + I1~9
   scenarios <- c("baseline", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9")
@@ -133,7 +141,9 @@ run_model1_all <- function(iter) {
   # sequence list 
   sequences <- list(
     E = c("Elevator"),
+    FD = c("Frontdesk"),
     E_FD = c("Elevator", "Frontdesk"),
+    TT= c("Table"),
     E_TT = c("Elevator", "Table")
   )
   
@@ -142,8 +152,8 @@ run_model1_all <- function(iter) {
   for (sc in scenarios) {
     for (seq_name in names(sequences)) {
       seq_val <- sequences[[seq_name]]
-      out <- run_touch_sequence(seq_val, sc, iter)
-      key <- paste0("Model1_", sc, "_", seq_name)
+      out <- run_touch_sequence_2(seq_val, sc, iter)
+      key <- paste0("Model2_", sc, "_", seq_name)
       results[[key]] <- out
     }
   }
@@ -214,7 +224,7 @@ plot_risk_violin_1 <- function(df) {
 #========================================
 
 # Run model
-results <- run_model1_all(iter = 10000)
+results <- run_model2_all(iter = 10000)
 
 
 # Data prep for visualization
@@ -225,7 +235,7 @@ risk_df <- prepare_risk_plot_data(results)
 windows()
 plot_risk_violin(risk_df)
 
-ggsave("Infection risk_m1_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
+ggsave("Infection risk_m2_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
 
 # Filter only rows where Sequence == "E"
 risk_df_E <- risk_df %>% filter(Sequence=="E")
@@ -326,7 +336,7 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
   #-------------------------------------------------------
   # Step 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
-  surf1 <- sequence[1]
+  surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
@@ -571,4 +581,3 @@ p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
   theme_minimal(base_size=14)
 
 p2
-
