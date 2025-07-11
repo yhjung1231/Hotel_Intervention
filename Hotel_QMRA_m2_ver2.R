@@ -227,22 +227,50 @@ plot_risk_violin_1 <- function(df) {
 #Step 4: Run model 1 and plot the model 1
 #========================================
 
-# Run model
+#4.1: Run model
 results <- run_model2_all(iter = 10000)
 
 
-# Data prep for visualization
+#4.2: Data prep for visualization
 risk_df <- prepare_risk_plot_data(results)
 
 
-# Visualization
+#4.3: Visualization 
+
+# Violin plot for total scenarios
+
 windows()
 plot_risk_violin(risk_df)
 
 ggsave("Infection risk_m2_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
 
-# Filter only rows where Sequence == "E"
+#4.4: Intervention compare
+
+risk_df_comp <-risk_df %>% filter(Scenario %in% c("baseline", "I1", "I2", "I3", "I8","I9"))
+
+plot_itv<-
+  ggplot(risk_df_comp, aes(x = Scenario, y = Risk, fill = Scenario)) +
+    geom_violin(trim = FALSE, alpha = 0.6) +
+    geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
+    facet_wrap(~ Sequence, scales = "free_y") +
+    scale_y_continuous(trans = "log10", labels = scales::scientific,
+                       breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
+    labs(y = "Risk (log10)", x = "Scenario") +
+    theme_minimal()
+
+windows()
+plot_itv
+
+#4.5: handsanitizing scenario compare
+risk_df_hs <- risk_df %>% filter(Scenario %in% c("baseline", "I4", "I5", "I6", "I7","I8","I9"))
+
+
+
+#4.4: Filter risk result only rows where Sequence == "E"
 risk_df_E <- risk_df %>% filter(Sequence=="E")
+
+
+
 
 # Plot only for Sequence == "E"
 windows()
@@ -320,6 +348,16 @@ write.csv(summary_Conc_h, "summary_Conc_h_m2.csv", row.names = FALSE)
 write.csv(summary_Conc_s, "summary_Conc_s_m2.csv", row.names = FALSE)
 write.csv(summary_Dose,   "summary_Dose_m2.csv", row.names = FALSE)
 write.csv(summary_Risk,   "summary_Risk_m2.csv", row.names = FALSE)
+
+
+#summary of starting concentration info 
+params_E<- get_surface_params ("Elevator", iter)
+params_FD<-get_surface_params ("Frontdesk", iter)
+params_TT<-get_surface_params ("Table", iter)
+
+#M1
+summary_Conc.surf.i<-generate_summary_stats(params_E$Conc.surf.i)
+
 
 #============================
 #Step 6: Sensitivity Analysis

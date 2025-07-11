@@ -141,3 +141,11 @@ TE.gs <- params$TE.hs * hand_glove
 # - params$Conc.recover
 # - params$k.surf
 # - TE.sg, TE.gs
+
+#summary of starting concentration info 
+params_E<- get_surface_params ("Elevator", iter)
+params_FD<-get_surface_params ("Frontdesk", iter)
+params_TT<-get_surface_params ("Table", iter)
+
+#M1
+summarise(params_E$Conc.surf.i)
