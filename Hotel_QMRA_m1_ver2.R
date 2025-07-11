@@ -14,6 +14,8 @@ source("Hotel_Parameters_ver2.R")
 
 ### I4,5 - P_HS:0.12/ I6,7 - P_HS:0.2/ I8,9- P_HS: 0.48
 
+debug_log_list<-list()
+
 
 # Step 1: Main function for touch sequence 
 run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
@@ -77,6 +79,17 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
     # Transfer efficiencies
     TE.sh <- if (scenario == "I3") param$TE.sh * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.h_fil else param$TE.sh
     TE.hs <- if (scenario == "I3") param$TE.hs * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.fil_h else param$TE.hs
+    
+    #Saving parameters
+    debug_log_list[[length(debug_log_list) + 1]] <<- data.frame(
+      Scenario = scenario,
+      Surface = surf,
+      TE.sh = mean(TE.sh),
+      TE.hs = mean(TE.hs),
+      k.surf = mean(k.surf),
+      Conc.surf.i = mean(Conc.surf.i)
+    )
+    
     
     # Hand concentration after touching surface
     Conc.h[i, ] <- Conc.h.prev * exp(-k.hand * Time.m1) - {
@@ -211,6 +224,12 @@ plot_risk_violin_1 <- function(df) {
 
 # Run model
 results <- run_model1_all(iter = 10000)
+
+#Parameter saving 
+debug_log_df <- do.call(rbind, debug_log_list)
+write.csv(debug_log_df, "debug_output.csv", row.names = FALSE)
+
+
 
 
 # Data prep for visualization

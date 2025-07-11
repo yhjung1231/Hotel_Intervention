@@ -18,6 +18,8 @@ source("Hotel_Parameters_ver2.R")
 ### I4,5 - P_HS:0.12/ I6,7 - P_HS:0.2/ I8,9- P_HS: 0.48
 
 
+debug_log_list<-list()
+
 # Step 1: Main function for touch sequence 
 run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) {
   
@@ -36,14 +38,14 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   param1 <- get_surface_params(surf1, iter)
   
   # Transfer efficiencies (adjusted by intervention)
-  TE.sh1 <- if (scenario == "I1") TE.h_fil 
+  TE.sh1 <- if (scenario == "I1" && surf1 == "Elevator") TE.h_fil 
   else param1$TE.sh
   
-  TE.hs1 <- if (scenario == "I1") TE.fil_h 
+  TE.hs1 <- if (scenario == "I1" && surf1 == "Elevator") TE.fil_h 
   else param1$TE.hs
   
   # Surface inactivation rate
-  k.surf <- if (scenario == "I1") k.surf.cu else param1$k.surf
+  k.surf <- if (scenario == "I1" && surf1 == "Elevator") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
   LR.factor <- if (scenario == "I2") LR.S else 1
@@ -73,11 +75,14 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   Conc.h.prev <- Conc.h.sus
   Time.m2<-4*60 #(4 hours)
   
+  
+  
   for (i in seq_along(sequence)) {
     surf <- sequence[i]
     param <- get_surface_params(surf, iter)
     
-    k.surf <- if (scenario == "I1" & surf == "Elevator") k.surf.cu else param$k.surf
+    
+    k.surf <- if (scenario == "I1" && surf == "Elevator") k.surf.cu else param$k.surf
     Conc.recover <- param$Conc.recover
     
 
@@ -90,6 +95,17 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
     # Transfer efficiencies
     TE.sh <- if (scenario == "I3") param$TE.sh * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.h_fil else param$TE.sh
     TE.hs <- if (scenario == "I3") param$TE.hs * hand_glove else if (scenario == "I1" & surf == "Elevator") TE.fil_h else param$TE.hs
+    
+    #Debuging log / parameter checking
+    debug_log_list[[length(debug_log_list) + 1]] <<- data.frame(
+      Scenario = scenario,
+      Surface = surf,
+      TE.sh = mean(TE.sh),
+      TE.hs = mean(TE.hs),
+      k.surf = mean(k.surf),
+      Conc.4hour = mean(Conc.4hour),
+      Conc.surf.i = mean(Conc.surf.i)
+    )
     
     # Hand concentration after touching surface
     Conc.h[i, ] <- Conc.h.prev * exp(-k.hand * Time.m1) - {
@@ -117,6 +133,9 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
     
     # Update previous hand concentration for next contact event
     Conc.h.prev <- Conc.h[i, ]
+    
+    
+   
   }
   
   #------------------------------------
@@ -208,7 +227,6 @@ plot_risk_violin <- function(df) {
       labels = scales::scientific
       #,breaks = c(1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)
       ) +
-    #scale_y_cut(breaks=c(1e-26, 1e-20))+
     labs(y = "Risk (log10)", x = "Scenario") +
     theme_minimal()
 }
@@ -227,8 +245,13 @@ plot_risk_violin_1 <- function(df) {
 #Step 4: Run model 1 and plot the model 1
 #========================================
 
+
 #4.1: Run model
-results <- run_model2_all(iter = 10000)
+results <- run_model2_all(iter)
+
+#Parameter saving 
+debug_log_df <- do.call(rbind, debug_log_list)
+write.csv(debug_log_df, "debug_output.csv", row.names = FALSE)
 
 
 #4.2: Data prep for visualization
@@ -248,18 +271,63 @@ ggsave("Infection risk_m2_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, widt
 
 risk_df_comp <-risk_df %>% filter(Scenario %in% c("baseline", "I1", "I2", "I3", "I8","I9"))
 
-plot_itv<-
-  ggplot(risk_df_comp, aes(x = Scenario, y = Risk, fill = Scenario)) +
-    geom_violin(trim = FALSE, alpha = 0.6) +
-    geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
-    facet_wrap(~ Sequence, scales = "free_y") +
-    scale_y_continuous(trans = "log10", labels = scales::scientific,
-                       breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
-    labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+
+# Set the threshold (1e-22)
+threshold <- 1e-22
+
+risk_df_comp_marked <- risk_df_comp %>%
+  mutate(
+    Risk_display = pmax(Risk, threshold),  # change the value below threshold to threshold value
+    below_threshold = Risk < threshold     
+  )
+
+#extreme value information summary 
+extreme_values<-risk_df_comp %>%
+  filter(Risk<threshold) %>%
+  group_by(Sequence, Scenario) %>%
+  summarize (
+    count = n(),
+    min_risk= min(Risk),
+    mean_risk=mean(Risk),
+    .groups='drop'
+  )
+
+#Plot drawing 
+plot_itv <- ggplot(risk_df_comp_marked, aes(x = Scenario, y = Risk_display, fill = Scenario)) +
+  geom_violin(trim = FALSE, alpha = 0.6) +
+  geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
+  
+  # data below threshold line 
+  geom_point(data = filter(risk_df_comp_marked, below_threshold), 
+             aes(y = Risk_display), 
+             shape = 25, size = 2, color = "red", fill = "red") +
+  
+  #Add extreme values 
+  geom_text(data=extreme_values, 
+            aes(x= Scenario, y=threshold,
+                label=paste0("Min:", scales::scientific (min_risk, digits=1), 
+                             "| Mean:", scales::scientific (mean_risk, digits=1))),
+            vjust=1.2, hjust=0.5, size=2.5, color = "red",
+            fontface = "bold")+
+
+    facet_wrap(~ Sequence, scales = "fixed", nrow=1) +
+  scale_y_continuous(trans = "log10", 
+                     labels = scales::scientific,
+                     breaks = c(1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6),
+                     limits = c(threshold, max(risk_df_comp$Risk))) +
+  
+  # Threshold line drawing
+  geom_hline(yintercept = threshold, linetype = "dashed", color = "red", alpha = 0.5) +
+  labs(y = "Risk (log10)", x = "Scenario",
+       caption = "Red triangles indicate values below 1e-22") +
+  theme_minimal()
+
 
 windows()
 plot_itv
+
+ggsave("Infection risk_m2_intcomp.tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
+
 
 #4.5: handsanitizing scenario compare
 risk_df_hs <- risk_df %>% filter(Scenario %in% c("baseline", "I4", "I5", "I6", "I7","I8","I9"))
@@ -488,7 +556,9 @@ run_model1_all_SA <- function(iter) {
 
 
 # Run model
-results_SA <- run_model1_all_SA(iter = 10000)
+
+
+results_SA <- run_model1_all_SA(iter)
 
 #Prep Risk Result for Sensitivity Analysis
 
