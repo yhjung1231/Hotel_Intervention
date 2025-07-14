@@ -313,7 +313,7 @@ plot_itv <- ggplot(risk_df_comp_marked, aes(x = Scenario, y = Risk_display, fill
     facet_wrap(~ Sequence, scales = "fixed", nrow=1) +
   scale_y_continuous(trans = "log10", 
                      labels = scales::scientific,
-                     breaks = c(1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6),
+                     breaks = c(1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6),
                      limits = c(threshold, max(risk_df_comp$Risk))) +
   
   # Threshold line drawing
@@ -332,19 +332,20 @@ ggsave("Infection risk_m2_intcomp.tiff", dpi=600, dev= 'tiff', height=6, width=2
 #4.5: handsanitizing scenario compare
 risk_df_hs <- risk_df %>% filter(Scenario %in% c("baseline", "I4", "I5", "I6", "I7","I8","I9"))
 
+plot_hs<-
+  ggplot(risk_df_hs, aes(x = Scenario, y = Risk, fill = Scenario)) +
+  geom_violin(trim = FALSE, alpha = 0.6) +
+  geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
+  facet_wrap(~ Sequence, scales = "fixed", nrow=1) +
+  scale_y_continuous(trans = "log10", labels = scales::scientific, breaks = c(1e-22, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)) +
+  labs(y = "Risk (log10)", x = "Scenario") +
+  theme_minimal()
 
-
-#4.4: Filter risk result only rows where Sequence == "E"
-risk_df_E <- risk_df %>% filter(Sequence=="E")
-
-
-
-
-# Plot only for Sequence == "E"
 windows()
-plot_risk_violin_1(risk_df_E)
+plot_hs
 
-ggsave("Infection risk_m2_E (HHC).tiff", dpi=600, dev= 'tiff', height=6, width=9, units='in')
+ggsave("Infection risk_m2_hscomp.tiff", dpi=600, dev= 'tiff', height=6, width=20, units='in')
+
 
 
 #==============================================================
@@ -353,8 +354,8 @@ ggsave("Infection risk_m2_E (HHC).tiff", dpi=600, dev= 'tiff', height=6, width=9
 
 
 #Step 5.0: Data structure confirm 
-str(results[["Model1_baseline_E"]]$Conc.h)
-df_test<- as.data.frame(results[["Model1_baseline_E"]]$Conc.h)
+str(results[["Model2_baseline_E"]]$Conc.h)
+df_test<- as.data.frame(results[["Model2_baseline_E"]]$Conc.h)
 
 #Step 5.1: Extract event-level values from each result matrix and reshape for analysis
 prepare_event_level_data <- function (results, variable_name=c("Conc.h", "Conc.s", "Dose", "Risk")){
@@ -418,22 +419,14 @@ write.csv(summary_Dose,   "summary_Dose_m2.csv", row.names = FALSE)
 write.csv(summary_Risk,   "summary_Risk_m2.csv", row.names = FALSE)
 
 
-#summary of starting concentration info 
-params_E<- get_surface_params ("Elevator", iter)
-params_FD<-get_surface_params ("Frontdesk", iter)
-params_TT<-get_surface_params ("Table", iter)
-
-#M1
-summary_Conc.surf.i<-generate_summary_stats(params_E$Conc.surf.i)
-
 
 #============================
-#Step 6: Sensitivity Analysis
+#Step 6: Sensitivity Analysis (have to update this)
 #============================
 
 # Prep all intervention included scenario I10 for elevator sequence scenario "E"
 
-run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL) {
+run_touch_sequence_SA2 <- function(sequence, scenario, iter, intervention = NULL) {
   
   numevents <- length(sequence) + 1  # +1 for face touch at the end
   eventsname <- c(paste0("suscept touch seq ", seq_along(sequence)), "Hand to face touch")
@@ -471,6 +464,7 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
   LR_applied <-ifelse (compliance, LR.HS, 1)
   Conc.surf.i <- Conc.surf.i / LR_applied
   
+  
   #----------------------------------------------------------------------------
   # Step 2: Susceptible person touches surfaces (Loop over each touch sequence)
   #----------------------------------------------------------------------------
@@ -479,11 +473,21 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
   # It will be updated with each loop iteration using Conc.h[i, ]
   
   Conc.h.prev <- Conc.h.sus
+  Time.m2<-4*60 #(4 hours)
+  
   
   for (i in seq_along(sequence)) {
     surf <- sequence[i]
     param <- get_surface_params(surf, iter)
     k.surf <- if (surf == "Elevator") k.surf.cu else param$k.surf
+    Conc.recover <- param$Conc.recover
+    
+    
+    #Concentration on each fomite after 4 hours 
+    
+    Conc.4hour<-if (surf == "Elevator")(Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i*exp(-k.surf*Time.m2)
+    else (Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i
+    
     
     # Transfer efficiencies
     TE.sh <- if (surf == "Elevator") TE.h_fil * hand_glove else param$TE.sh * hand_glove 
@@ -497,17 +501,16 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
     
     # Intervention 4, 6, 8: Hand hygiene after first elevator contact (Administrative)
     
-    if (i == 1 && surf == "Elevator") {
+    if (surf == "Elevator") {
       compliance <-runif(iter) < P_HS
       LR_applied <-ifelse(compliance, LR.HS, 1)
       Conc.h[i, ] <- Conc.h[i, ] / LR_applied
     }
     
     # Surface concentration update
-    Conc.s[i, ] <- if (i == 1) Conc.surf.i * exp(-k.surf * Time.m1) else 0
-    Conc.s[i, ] <- Conc.s[i, ] - {
+    Conc.s[i, ] <- Conc.4hour * exp(-k.surf * Time.m1)- {
       param$Frac.hs * (T.handarea / param$T.surfarea) *
-        (TE.sh * if (i == 1) Conc.surf.i * exp(-k.surf * Time.m1) else 0 -
+        (TE.sh * Conc.4hour * exp(-k.surf * Time.m1) -
            Conc.h.prev * exp(-k.hand * Time.m1))
     }
     
@@ -517,6 +520,8 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
     # Update previous hand concentration for next contact event
     Conc.h.prev <- Conc.h[i, ]
   }
+
+  
   
   #------------------------------------
   # Step 3: Final hand-to-face contact
@@ -532,7 +537,7 @@ run_touch_sequence_SA <- function(sequence, scenario, iter, intervention = NULL)
 #=============================================================================================
 # Step 2: Model fucntion to pack and run all the scenario in different sequence (sub-scenarios)
 #==============================================================================================
-run_model1_all_SA <- function(iter) {
+run_model2_all_SA <- function(iter) {
   
   # scenarios: baseline + I1~9
   scenarios <- c("I10")
@@ -545,8 +550,8 @@ run_model1_all_SA <- function(iter) {
   for (sc in scenarios) {
     for (seq_name in names(sequences)) {
       seq_val <- sequences[[seq_name]]
-      out <- run_touch_sequence_SA(seq_val, sc, iter)
-      key <- paste0("Model1_", sc, "_", seq_name)
+      out <- run_touch_sequence_SA2(seq_val, sc, iter)
+      key <- paste0("Model2_", sc, "_", seq_name)
       results[[key]] <- out
     }
   }
@@ -558,7 +563,7 @@ run_model1_all_SA <- function(iter) {
 # Run model
 
 
-results_SA <- run_model1_all_SA(iter)
+results_SA <- run_model2_all_SA(iter)
 
 #Prep Risk Result for Sensitivity Analysis
 
@@ -583,12 +588,12 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m2_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
 #, Conc.recover, Sample.surfarea, T.surfarea
 
 
-spear.anal_E<-cor(spear.m1_E,method="spearman")
+spear.anal_E<-cor(spear.m2_E,method="spearman")
 
 View(spear.anal_E)
 
@@ -605,13 +610,13 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m2_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                         LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
 #, Conc.recover, Sample.surfarea, T.surfarea
 
 
 
-spear.anal_FD<-cor(spear.m1_FD,method="spearman")
+spear.anal_FD<-cor(spear.m2_FD,method="spearman")
 
 View(spear.anal_FD)
 
@@ -627,29 +632,28 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m2_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                         LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
 #, Sample.surfarea
 
-spear.anal_TT<-cor(spear.m1_TT,method="spearman")
+spear.anal_TT<-cor(spear.m2_TT,method="spearman")
 
-#spear.anal_TT<-rcorr(as.matrix(spear.m1_TT), type="spearman")
 
 View(spear.anal_TT)
 
 # Save as Excel file 
 library(openxlsx)
 
-sheets_list <-list (Elevator = spear.anal_E, 
+sheets_list_2 <-list (Elevator = spear.anal_E, 
                     Frontdesk = spear.anal_FD,
                     Tabletop = spear.anal_TT)
 
-write.xlsx(sheets_list, file="Sensitivity.xlsx", rowNames=TRUE)
+write.xlsx(sheets_list_2, file="Sensitivity2.xlsx", rowNames=TRUE)
 
 
-#Top five parameter 
+#Top 10 parameter 
 
-## Helper function: Top 5 parameter extraction
+## Helper function: Top 10 parameter extraction
 
 get_top5_vars<- function(corr_matrix, scenario_name){
   vec <-corr_matrix["risk_vec",]
@@ -672,7 +676,7 @@ top5_table <-get_top5_vars(spear.anal_TT, "Table")
 #Combine
 top5_all <-rbind(top5_elevator, top5_frontdesk, top5_table)
 
-# make bar graph ("Top 5 Most Influential Parameters by Scenario")
+# make bar graph ("Top 10 Most Influential Parameters by Scenario")
 library (ggplot2)
 
 p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
@@ -684,12 +688,14 @@ p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
 
 p1
 
-ggsave("Top5 parameters.tiff", dpi=600, dev= 'tiff', height=6, width=12, units='in')
+ggsave("Correlation strengpth parameters_m2.tiff", dpi=600, dev= 'tiff', height=6, width=12, units='in')
 
 p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
   geom_bar (stat="identity", position = position_dodge(width=0.9))+
   coord_flip()+
-  labs(x= "Parameter", y="Spearman Correlation (|rho|)")+
+  labs(x= "Parameter", y="Spearman Correlation Strength (|ρ|)")+
   theme_minimal(base_size=14)
 
 p2
+ggsave("Top5 parameters_m2.tiff", dpi=600, dev= 'tiff', height=6, width=10, units='in')
+

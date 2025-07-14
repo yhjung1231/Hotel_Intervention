@@ -512,7 +512,7 @@ View(spear.anal_FD)
 param <- get_surface_params("Table", iter = 10000)
 
 T.surfarea <- param$T.surfarea
-Sample.surfarea <-rep(param$Sample.surfarea, length(risk_vec))
+Sample.surfarea <-param$Sample.surfarea
 Frac.hs<-param$Frac.hs
 Conc.recover<-param$Conc.recover
 TE.sh <- param$TE.sh
@@ -520,15 +520,13 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                         LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
-#, Sample.surfarea
+#Conc.recover, Sample.surfarea
 
 spear.anal_TT<-cor(spear.m1_TT,method="spearman")
 
-#spear.anal_TT<-rcorr(as.matrix(spear.m1_TT), type="spearman")
 
-View(spear.anal_TT)
 
 # Save as Excel file 
 library(openxlsx)
@@ -547,7 +545,7 @@ write.xlsx(sheets_list, file="Sensitivity.xlsx", rowNames=TRUE)
 get_top5_vars<- function(corr_matrix, scenario_name){
   vec <-corr_matrix["risk_vec",]
   vec <-vec[names(vec) != "risk_vec"] #exclude "risk_vec"
-  top_vars <- sort(abs(vec), decreasing = TRUE)[1:5]
+  top_vars <- sort(abs(vec), decreasing = TRUE)[1:20]
   
   df <-data.frame (
     variable = names(top_vars),
@@ -565,7 +563,7 @@ top5_table <-get_top5_vars(spear.anal_TT, "Table")
 #Combine
 top5_all <-rbind(top5_elevator, top5_frontdesk, top5_table)
 
-# make bar graph ("Top 5 Most Influential Parameters by Scenario")
+# make bar graph ("Top 10 Most Influential Parameters by Scenario")
 library (ggplot2)
 
 p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
@@ -577,13 +575,14 @@ p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
 
 p1
 
-ggsave("Top5 parameters.tiff", dpi=600, dev= 'tiff', height=6, width=12, units='in')
+ggsave("Correlation strength parameters_m1.tiff", dpi=600, dev= 'tiff', height=6, width=12, units='in')
 
 p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenario))+
   geom_bar (stat="identity", position = position_dodge(width=0.9))+
   coord_flip()+
-  labs(x= "Parameter", y="Spearman Correlation (|rho|)")+
+  labs(x= "Parameter", y="Spearman Correlation Strength (|ρ|)")+
   theme_minimal(base_size=14)
 
 p2
+ggsave("Top5 parameters_m1.tiff", dpi=600, dev= 'tiff', height=6, width=10, units='in')
 
