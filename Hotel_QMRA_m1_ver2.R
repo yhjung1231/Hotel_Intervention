@@ -476,9 +476,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
-                     #, Conc.recover, Sample.surfarea, T.surfarea
+spear.m1_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc,  Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+                       LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+                     #RE.swab,Conc.seed, Conc.recover, Sample.surfarea, T.surfarea
   
   
 spear.anal_E<-cor(spear.m1_E,method="spearman")
@@ -498,9 +498,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
-#, Conc.recover, Sample.surfarea, T.surfarea
+spear.m1_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc,  Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+#RE.swab,Conc.seed, Conc.recover, Sample.surfarea, T.surfarea
 
 
 
@@ -520,9 +520,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
-#Conc.recover, Sample.surfarea
+spear.m1_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc,  Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh , T.surfarea)
+#RE.swab,Conc.seed, Conc.recover, Sample.surfarea
 
 spear.anal_TT<-cor(spear.m1_TT,method="spearman")
 
