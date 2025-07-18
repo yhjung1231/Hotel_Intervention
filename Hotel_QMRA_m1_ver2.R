@@ -545,7 +545,7 @@ write.xlsx(sheets_list, file="Sensitivity.xlsx", rowNames=TRUE)
 get_top5_vars<- function(corr_matrix, scenario_name){
   vec <-corr_matrix["risk_vec",]
   vec <-vec[names(vec) != "risk_vec"] #exclude "risk_vec"
-  top_vars <- sort(abs(vec), decreasing = TRUE)[1:20]
+  top_vars <- sort(abs(vec), decreasing = TRUE)[1:5]
   
   df <-data.frame (
     variable = names(top_vars),
