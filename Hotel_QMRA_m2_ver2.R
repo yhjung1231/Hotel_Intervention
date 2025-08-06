@@ -7,7 +7,7 @@ source("Hotel_Parameters_ver2.R")
 # Touch scenario function: loop by the sequence and applying intervention factors
 
 ## sequence: character vector, e.g. c("Elevator"), c("Elevator", "Frontdesk")
-## scenario: "baseline", "I1", "I2", "I3", "I4", "I5"
+## scenario: "Baseline", "I1", "I2", "I3", "I4", "I5"
 ## Baseline - no intervention 
 ## I1: Using Antimicrobial film on the elevator button (Engineering control)
 ## I2: Targeted Hygiene on the elevator button (Administrative 1)
@@ -32,7 +32,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   Risk <- matrix(NA, nrow=numevents, ncol=iter, dimnames = list(eventsname, NULL))
   
   #-------------------------------------------------------
-  # Step 1: Event 0 - Infected guest touches first surface
+  # Scene 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
   surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
@@ -66,7 +66,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   }
   
   #----------------------------------------------------------------------------
-  # Step 2: Susceptible person touches surfaces (Loop over each touch sequence)
+  # Scene 2: Susceptible person touches surfaces (Loop over each touch sequence)
   #----------------------------------------------------------------------------
   # Initialize hand concentration before first surface contact
   # This is only used for the FIRST contact (sequence[1])
@@ -139,7 +139,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   }
   
   #------------------------------------
-  # Step 3: Final hand-to-face contact
+  # Scene 3: Final hand-to-face contact
   #------------------------------------
   Conc.h[numevents, ] <- (1 - TE.hf * Frac.hf) * (Conc.h.prev * exp(-k.hand * Time.m1))
   Conc.s[numevents, ] <- Conc.s[numevents - 1, ] * exp(-k.surf * Time.m1)
@@ -154,8 +154,8 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
 #==============================================================================================
 run_model2_all <- function(iter) {
   
-  # scenarios: baseline + I1~9
-  scenarios <- c("baseline", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9")
+  # scenarios: Baseline + I1~9
+  scenarios <- c("Baseline", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9")
   
   # sequence list 
   sequences <- list(
@@ -269,7 +269,7 @@ ggsave("Infection risk_m2_total(HHC).tiff", dpi=600, dev= 'tiff', height=6, widt
 
 #4.4: Intervention compare
 
-risk_df_comp <-risk_df %>% filter(Scenario %in% c("baseline", "I1", "I2", "I3", "I8","I9"))
+risk_df_comp <-risk_df %>% filter(Scenario %in% c("Baseline", "I1", "I2", "I3", "I8","I9"))
 
 
 # Set the threshold (1e-22)
@@ -330,7 +330,7 @@ ggsave("Infection risk_m2_intcomp.tiff", dpi=600, dev= 'tiff', height=6, width=2
 
 
 #4.5: handsanitizing scenario compare
-risk_df_hs <- risk_df %>% filter(Scenario %in% c("baseline", "I4", "I5", "I6", "I7","I8","I9"))
+risk_df_hs <- risk_df %>% filter(Scenario %in% c("Baseline", "I4", "I5", "I6", "I7","I8","I9"))
 
 plot_hs<-
   ggplot(risk_df_hs, aes(x = Scenario, y = Risk, fill = Scenario)) +
@@ -354,8 +354,8 @@ ggsave("Infection risk_m2_hscomp.tiff", dpi=600, dev= 'tiff', height=6, width=20
 
 
 #Step 5.0: Data structure confirm 
-str(results[["Model2_baseline_E"]]$Conc.h)
-df_test<- as.data.frame(results[["Model2_baseline_E"]]$Conc.h)
+str(results[["Model2_Baseline_E"]]$Conc.h)
+df_test<- as.data.frame(results[["Model2_Baseline_E"]]$Conc.h)
 
 #Step 5.1: Extract event-level values from each result matrix and reshape for analysis
 prepare_event_level_data <- function (results, variable_name=c("Conc.h", "Conc.s", "Dose", "Risk")){

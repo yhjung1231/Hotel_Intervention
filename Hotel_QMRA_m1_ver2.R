@@ -29,7 +29,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   Risk <- matrix(NA, nrow=numevents, ncol=iter, dimnames = list(eventsname, NULL))
   
   #-------------------------------------------------------
-  # Step 1: Event 0 - Infected guest touches first surface
+  # Scene 1: Event 0 - Infected guest touches first surface
   #-------------------------------------------------------
   surf1 <- "Elevator"
   param1 <- get_surface_params(surf1, iter)
@@ -63,7 +63,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   }
   
   #----------------------------------------------------------------------------
-  # Step 2: Susceptible person touches surfaces (Loop over each touch sequence)
+  # Scene 2: Susceptible person touches surfaces (Loop over each touch sequence)
   #----------------------------------------------------------------------------
   # Initialize hand concentration before first surface contact
   # This is only used for the FIRST contact (sequence[1])
@@ -121,7 +121,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   }
   
   #------------------------------------
-  # Step 3: Final hand-to-face contact
+  # Scene 3: Final hand-to-face contact
   #------------------------------------
   Conc.h[numevents, ] <- (1 - TE.hf * Frac.hf) * (Conc.h.prev * exp(-k.hand * Time.m1))
   Conc.s[numevents, ] <- Conc.s[numevents - 1, ] * exp(-k.surf * Time.m1)
@@ -137,7 +137,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
 run_model1_all <- function(iter) {
   
   # scenarios: baseline + I1~9
-  scenarios <- c("baseline", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9")
+  scenarios <- c("Baseline", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9")
   
   # sequence list 
   sequences <- list(
