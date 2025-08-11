@@ -338,8 +338,8 @@ plot_hs<-
   geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
   facet_wrap(~ Sequence, scales = "fixed", nrow=1) +
   scale_y_continuous(trans = "log10", labels = scales::scientific, breaks = c(1e-22, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)) +
-  labs(y = "Risk (log10)", x = "Scenario") +
-  theme_minimal()
+  labs(y = "Risk (log10)", x = "Scenario") #+
+  #theme_minimal()
 
 windows()
 plot_hs
