@@ -14,6 +14,7 @@ source("Hotel_Parameters_ver2.R")
 ## I3: Using hand gloves - susceptible only (PPE)
 ## I4: I1+I2
 ## I5: I1+I2+I3
+## I6: I2+I3
 
 
 debug_log_list<-list()
@@ -46,7 +47,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   k.surf <- if (scenario %in% c("I1", "I1+I2", "I1+I2+I3") && surf1 == "Elevator") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
-  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3")) LR.S else 1
+  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3", "I2+I3")) LR.S else 1
   
   # Initial surface concentration by infected person
   Conc.surf.i <- TE.hs1 * param1$Frac.hs * (T.handarea / param1$T.surfarea) * Conc.h.inf / LR.factor
@@ -60,7 +61,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   # It will be updated with each loop iteration using Conc.h[i, ]
   
   Conc.h.prev <- Conc.h.sus
-  Time.m2<-4*60 #(4 hours)
+  Time.m2<-4*60 #(min, 4 hours)
   
   
   
@@ -80,8 +81,8 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
     
     
     # Transfer efficiencies
-    TE.sh <- if (scenario == "I3") param$TE.sh * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.h_fil else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.sh
-    TE.hs <- if (scenario == "I3") param$TE.hs * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.fil_h else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.hs
+    TE.sh <- if (scenario %in% c("I3", "I2+I3")) param$TE.sh * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.h_fil else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.sh
+    TE.hs <- if (scenario %in% c("I3", "I2+I3")) param$TE.hs * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.fil_h else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.hs
     
     #Debuging log / parameter checking
     debug_log_list[[length(debug_log_list) + 1]] <<- data.frame(
@@ -133,8 +134,8 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
 #==============================================================================================
 run_model2_all <- function(iter) {
   
-  # scenarios: Baseline + I1~9
-  scenarios <- c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3")
+  # scenarios: Baseline + I1~I6
+  scenarios <- c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3", "I2+I3")
   
   # sequence list 
   sequences <- list(
@@ -193,7 +194,7 @@ prepare_risk_plot_data <- function(results) {
   
   #Scenario order 
   full_df$Scenario <- factor(full_df$Scenario,
-                             levels = c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3"))
+                             levels = c("Baseline", "I1", "I2", "I3", "I1+I2", "I2+I3", "I1+I2+I3"))
   
   return(full_df)
 }
@@ -253,7 +254,7 @@ ggsave("Infection risk_m2_layer(all).tiff", dpi=600, dev= 'tiff', height=6, widt
 
 #4.4: Intervention compare
 
-risk_df_comp <-risk_df %>% filter(Scenario %in% c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3"))
+risk_df_comp <-risk_df %>% filter(Scenario %in% c("Baseline", "I1", "I2", "I3", "I1+I2","I2+I3", "I1+I2+I3"))
 
 
 # Set the threshold (1e-22)

@@ -205,7 +205,7 @@ plot_risk_violin <- function(df) {
       labels = scales::scientific,
       breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
     labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    theme_bw()
 }
 
 plot_risk_violin_1 <- function(df) {
@@ -215,7 +215,7 @@ plot_risk_violin_1 <- function(df) {
     scale_y_continuous(trans = "log10", labels = scales::scientific,
                        breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
     labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    theme_bw()
 }
 
 #========================================

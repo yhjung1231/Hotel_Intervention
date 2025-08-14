@@ -228,7 +228,7 @@ plot_risk_violin <- function(df) {
       #,breaks = c(1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)
       ) +
     labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    theme_bw()
 }
 
 plot_risk_violin_1 <- function(df) {
@@ -238,7 +238,7 @@ plot_risk_violin_1 <- function(df) {
     scale_y_continuous(trans = "log10", labels = scales::scientific,
                        breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
     labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    theme_bw()
 }
 
 #========================================
@@ -251,7 +251,7 @@ results <- run_model2_all(iter)
 
 #Parameter saving 
 debug_log_df <- do.call(rbind, debug_log_list)
-write.csv(debug_log_df, "debug_output.csv", row.names = FALSE)
+write.csv(debug_log_df, "debug_output_m2.csv", row.names = FALSE)
 
 
 #4.2: Data prep for visualization
@@ -320,7 +320,7 @@ plot_itv <- ggplot(risk_df_comp_marked, aes(x = Scenario, y = Risk_display, fill
   geom_hline(yintercept = threshold, linetype = "dashed", color = "red", alpha = 0.5) +
   labs(y = "Risk (log10)", x = "Scenario",
        caption = "Red triangles indicate values below 1e-22") +
-  theme_minimal()
+  theme_bw()
 
 
 windows()
@@ -338,8 +338,8 @@ plot_hs<-
   geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
   facet_wrap(~ Sequence, scales = "fixed", nrow=1) +
   scale_y_continuous(trans = "log10", labels = scales::scientific, breaks = c(1e-22, 1e-20, 1e-18, 1e-16, 1e-14, 1e-12, 1e-10, 1e-8, 1e-6)) +
-  labs(y = "Risk (log10)", x = "Scenario") #+
-  #theme_minimal()
+  labs(y = "Risk (log10)", x = "Scenario") +
+  theme_bw()
 
 windows()
 plot_hs
@@ -684,7 +684,7 @@ p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
   coord_flip()+
   facet_wrap(~scenario, scales="free")+
   labs(x= "Parameter", y="Correlation Strength (|ρ|)")+
-  theme_minimal(base_size=14)
+  theme_bw(base_size=14)
 
 p1
 
@@ -694,7 +694,7 @@ p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
   geom_bar (stat="identity", position = position_dodge(width=0.9))+
   coord_flip()+
   labs(x= "Parameter", y="Spearman Correlation Strength (|ρ|)")+
-  theme_minimal(base_size=14)
+  theme_bw(base_size=14)
 
 p2
 ggsave("Top5 parameters_m2.tiff", dpi=600, dev= 'tiff', height=6, width=10, units='in')

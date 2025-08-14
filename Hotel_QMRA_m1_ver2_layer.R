@@ -11,6 +11,7 @@ source("Hotel_Parameters_ver2.R")
 ## I3: Using hand gloves - susceptible only (PPE)
 ## I4: I1+I2
 ## I5: I1+I2+I3
+## I6: I2+I3
 
 debug_log_list<-list()
 
@@ -43,7 +44,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
   k.surf <- if (scenario %in% c("I1", "I1+I2", "I1+I2+I3")) k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
-  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3")) LR.S else 1
+  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3", "I2+I3")) LR.S else 1
   
   # Initial surface concentration by infected person
   Conc.surf.i <- TE.hs1 * param1$Frac.hs * (T.handarea / param1$T.surfarea) * Conc.h.inf / LR.factor
@@ -64,8 +65,8 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
     k.surf <- if (scenario %in% c("I1", "I1+I2", "I1+I2+I3") & surf == "Elevator") k.surf.cu else param$k.surf
     
     # Transfer efficiencies
-    TE.sh <- if (scenario == "I3") param$TE.sh * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.h_fil else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.sh
-    TE.hs <- if (scenario == "I3") param$TE.hs * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.fil_h else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.hs
+    TE.sh <- if (scenario %in% c("I3", "I2+I3")) param$TE.sh * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.h_fil else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.sh
+    TE.hs <- if (scenario %in% c("I3", "I2+I3")) param$TE.hs * hand_glove else if (scenario %in% c("I1", "I1+I2") & surf == "Elevator") TE.fil_h else if (scenario =="I1+I2+I3" & surf == "Elevator") TE.h_fil* hand_glove else param$TE.hs
     
     #Saving parameters
     debug_log_list[[length(debug_log_list) + 1]] <<- data.frame(
@@ -117,7 +118,7 @@ run_touch_sequence <- function(sequence, scenario, iter, intervention = NULL) {
 run_model1_all <- function(iter) {
   
   # scenarios: baseline + I1~9
-  scenarios <- c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3")
+  scenarios <- c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3", "I2+I3")
   
   # sequence list 
   sequences <- list(
@@ -176,7 +177,7 @@ prepare_risk_plot_data <- function(results) {
   
   #Scenario order 
   full_df$Scenario <- factor(full_df$Scenario,
-                             levels = c("Baseline", "I1", "I2", "I3", "I1+I2", "I1+I2+I3"))
+                             levels = c("Baseline", "I1", "I2", "I3", "I1+I2", "I2+I3", "I1+I2+I3"))
   
   return(full_df)
 }
@@ -192,8 +193,8 @@ plot_risk_violin <- function(df) {
       trans = "log10",
       labels = scales::scientific,
       breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
-    labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    labs(y = "Risk (log10)", x = "Scenario")+
+    theme_bw()
 }
 
 plot_risk_violin_1 <- function(df) {
@@ -202,8 +203,8 @@ plot_risk_violin_1 <- function(df) {
     geom_boxplot(width = 0.1, outlier.size = 0.5, alpha = 0.8) +
     scale_y_continuous(trans = "log10", labels = scales::scientific,
                        breaks = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1)) +
-    labs(y = "Risk (log10)", x = "Scenario") +
-    theme_minimal()
+    labs(y = "Risk (log10)", x = "Scenario")+
+    theme_bw() 
 }
 
 #========================================
@@ -215,7 +216,7 @@ results <- run_model1_all(iter = 10000)
 
 #Parameter saving 
 debug_log_df <- do.call(rbind, debug_log_list)
-write.csv(debug_log_df, "debug_output.csv", row.names = FALSE)
+write.csv(debug_log_df, "debug_output_m1_layer.csv", row.names = FALSE)
 
 
 # Data prep for visualization
@@ -304,8 +305,8 @@ summary_Conc_s<-generate_summary_stats(all_data$Conc.s, "Conc.s")
 summary_Dose<-generate_summary_stats(all_data$Dose, "Dose")
 summary_Risk<-generate_summary_stats(all_data$Risk, "Risk")
 
-write.csv(summary_Conc_h, "summary_Conc_h.csv", row.names = FALSE)
-write.csv(summary_Conc_s, "summary_Conc_s.csv", row.names = FALSE)
-write.csv(summary_Dose,   "summary_Dose.csv", row.names = FALSE)
-write.csv(summary_Risk,   "summary_Risk.csv", row.names = FALSE)
+write.csv(summary_Conc_h, "summary_Conc_h_layer.csv", row.names = FALSE)
+write.csv(summary_Conc_s, "summary_Conc_s_layer.csv", row.names = FALSE)
+write.csv(summary_Dose,   "summary_Dose_layer.csv", row.names = FALSE)
+write.csv(summary_Risk,   "summary_Risk_layer.csv", row.names = FALSE)
 
