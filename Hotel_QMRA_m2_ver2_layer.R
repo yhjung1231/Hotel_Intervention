@@ -76,8 +76,8 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
     
     #Concentration on each fomite after 4 hours 
     
-    Conc.4hour<-if (scenario %in% c("I1", "I1+I2", "I1+I2+I3")&& surf == "Elevator")(Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i*exp(-k.surf*Time.m2)
-    else (Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i
+    Conc.4hour<-if (scenario %in% c("I1", "I1+I2", "I1+I2+I3")&& surf == "Elevator")(Conc.recover/Conc.seed)*Conc.surf.i*exp(-k.surf*Time.m2)
+    else (Conc.recover/Conc.seed)*Conc.surf.i
     
     
     # Transfer efficiencies

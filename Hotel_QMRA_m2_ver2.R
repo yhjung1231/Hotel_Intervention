@@ -88,8 +88,8 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
 
     #Concentration on each fomite after 4 hours 
     
-    Conc.4hour<-if (scenario == "I1" && surf == "Elevator")(Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i*exp(-k.surf*Time.m2)
-    else (Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i
+    Conc.4hour<-if (scenario == "I1" && surf == "Elevator")(Conc.recover/Conc.seed*Conc.surf.i*exp(-k.surf*Time.m2)
+    else (Conc.recover/(Conc.seed)*Conc.surf.i
     
 
     # Transfer efficiencies
@@ -485,8 +485,8 @@ run_touch_sequence_SA2 <- function(sequence, scenario, iter, intervention = NULL
     
     #Concentration on each fomite after 4 hours 
     
-    Conc.4hour<-if (surf == "Elevator")(Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i*exp(-k.surf*Time.m2)
-    else (Conc.recover/(Conc.seed*RE.swab))*Conc.surf.i
+    Conc.4hour<-if (surf == "Elevator")(Conc.recover/Conc.seed)*Conc.surf.i*exp(-k.surf*Time.m2)
+    else (Conc.recover/Conc.seed)*Conc.surf.i
     
     
     # Transfer efficiencies
@@ -589,7 +589,7 @@ k.surf<-param$k.surf
 
 
 spear.m2_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                       LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+                       LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
 #, Conc.recover, Sample.surfarea, T.surfarea
 
 
@@ -611,7 +611,7 @@ k.surf<-param$k.surf
 
 
 spear.m2_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
+                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
 #, Conc.recover, Sample.surfarea, T.surfarea
 
 
@@ -633,7 +633,7 @@ k.surf<-param$k.surf
 
 
 spear.m2_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, RE.swab, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
+                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
 #, Sample.surfarea
 
 spear.anal_TT<-cor(spear.m2_TT,method="spearman")

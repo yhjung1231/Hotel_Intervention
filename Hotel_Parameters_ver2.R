@@ -1,9 +1,7 @@
 # File 1: Parameters and Distributions ---------------------------------------
 
-library(readxl)
-library(truncdist)
-library(triangle)
-library(EnvStats)
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(readxl, truncdist, triangle,EnvStats)
 
 iter <- 10000
 set.seed(456)
@@ -13,7 +11,6 @@ Conc.h.inf_gc <- 10^(runif(iter, min=2.4, max=7.9))  # log-normal assumption
 
 # Recovery efficiency
 RE.rinse <- runif(iter, 0.2, 0.84)
-RE.swab  <- runif(iter, 0.28, 0.61)
 
 # Ratio gc to PFU
 gc_PFU <- rtri(iter, 5.8, 47, 28)
@@ -25,7 +22,8 @@ T.handarea <- runif(iter, 445, 535)
 Conc.h.inf <- Conc.h.inf_gc / (T.handarea * gc_PFU * RE.rinse)
 
 # Seeded surface concentration (PFU/cm2)
-Conc.seed <- rtri(iter, 1.37E+07, 2.37E+07, 1.87E+07) 
+Conc.samp.elv <- rtri(iter, 5.0E+05, 5.0E+06, 1.0E+06)
+Conc.seed <- Conc.samp.elv/10.14 
 
 # Fraction of hand touching face
 Frac.hf <- runif(iter, 0.008, 0.012)
