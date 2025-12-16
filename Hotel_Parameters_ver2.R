@@ -81,7 +81,7 @@ get_surface_params <- function(fomite, iter) {
     T.surfarea <- 10.14
     Sample.surfarea<-T.surfarea
     Frac.hs <- runif(iter, 0.008, 0.012)
-    Conc.recover <- 25/Sample.surfarea
+    Conc.recover <- runif(iter, 0, 25/Sample.surfarea)
     TE.sh <- rtrunc(iter, "norm", mean=0.37, sd=0.14, a=0, b=1)
     TE.hs <- rtrunc(iter, "norm", mean=0.16, sd=0.16, a=0, b=1)
     x <- 2
@@ -91,17 +91,17 @@ get_surface_params <- function(fomite, iter) {
     T.surfarea <- 871.2
     Sample.surfarea<-T.surfarea/4
     Frac.hs <- runif(iter, 0.013, 0.25)
-    Conc.recover <-25/Sample.surfarea
+    Conc.recover <-runif(iter, 0, 25/Sample.surfarea)
     TE.sh <- rtrunc(iter, "norm", mean=0.37, sd=0.14, a=0, b=1)
     TE.hs <- rtrunc(iter, "norm", mean=0.16, sd=0.16, a=0, b=1)
     x <- 2
     Time.inact <- runif(iter, 38, 58) * 60
     
   } else if (fomite == "Table") {
-    T.surfarea <- runif(iter, 4879, 12053)
+    T.surfarea <- runif(iter, 4879, 14457)
     Sample.surfarea <-T.surfarea/4
     Frac.hs <- runif(iter, 0.013, 0.25)
-    Conc.recover <- runif(iter, 4.15E-04, 4.31E-03)
+    Conc.recover <- rtri(iter, 0, 4.31E-03, 5.11E-04)
     TE.sh <- rtrunc(iter, "norm", mean=0.3, sd=0.18, a=0, b=1)
     TE.hs <- rtrunc(iter, "norm", mean=0.22, sd=0.17, a=0, b=1)
     x <- 10
