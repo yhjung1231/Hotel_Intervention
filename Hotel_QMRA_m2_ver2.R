@@ -48,7 +48,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   k.surf <- if (scenario == "I1" && surf1 == "Elevator") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
-  LR.factor <- if (scenario == "I2") LR.S else 1
+  LR.factor <- if (scenario == "I2" && surf1 == "Elevator") LR.S else 1
   
   # Initial surface concentration by infected person
   Conc.surf.i <- TE.hs1 * param1$Frac.hs * (T.handarea / param1$T.surfarea) * Conc.h.inf / LR.factor
@@ -88,8 +88,9 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
 
     #Concentration on each fomite after 4 hours 
     
-    Conc.4hour<-if (scenario == "I1" && surf == "Elevator")(Conc.recover/Conc.seed*Conc.surf.i*exp(-k.surf*Time.m2)
-    else (Conc.recover/(Conc.seed)*Conc.surf.i
+    Conc.4hour<-if (scenario == "I1" && surf == "Elevator")
+    {(Conc.recover/Conc.seed)*Conc.surf.i*exp(-k.surf*Time.m2)
+        }else {(Conc.recover/Conc.seed)*Conc.surf.i}
     
 
     # Transfer efficiencies
@@ -133,9 +134,6 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
     
     # Update previous hand concentration for next contact event
     Conc.h.prev <- Conc.h[i, ]
-    
-    
-   
   }
   
   #------------------------------------
@@ -588,9 +586,9 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m2_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m2_E<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Conc.recover, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
-#, Conc.recover, Sample.surfarea, T.surfarea
+# Sample.surfarea, T.surfarea
 
 
 spear.anal_E<-cor(spear.m2_E,method="spearman")
@@ -612,7 +610,7 @@ k.surf<-param$k.surf
 
 spear.m2_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                         LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
-#, Conc.recover, Sample.surfarea, T.surfarea
+# Sample.surfarea, T.surfarea
 
 
 
