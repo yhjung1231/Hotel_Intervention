@@ -124,6 +124,8 @@ get_surface_params <- function(fomite, iter) {
   ))
 }
 
+
+#==================================================================================
 # Example of how to use the parameter function -------------------------------
 
 #fomite <- "Elevator"  # or "Frontdesk", "Table"
