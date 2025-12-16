@@ -47,7 +47,7 @@ run_touch_sequence_2 <- function(sequence, scenario, iter, intervention = NULL) 
   k.surf <- if (scenario %in% c("I1", "I1+I2", "I1+I2+I3") && surf1 == "Elevator") k.surf.cu else param1$k.surf
   
   # Intervention 2: Targeted Hygiene (Administrative)
-  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3", "I2+I3")) LR.S else 1
+  LR.factor <- if (scenario %in% c("I2", "I1+I2", "I1+I2+I3", "I2+I3") && surf1 == "Elevator") LR.S else 1
   
   # Initial surface concentration by infected person
   Conc.surf.i <- TE.hs1 * param1$Frac.hs * (T.handarea / param1$T.surfarea) * Conc.h.inf / LR.factor
