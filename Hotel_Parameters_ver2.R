@@ -54,6 +54,7 @@ safe_risk_calc <- function(dose, alpha=0.722, beta=1106) {
 # Interventions --------------------------------------------------------------
 
 # Engineering: Antimicrobial surface (copper)
+LR.Film <- 10^(runif(iter, 4, 6)) 
 k.surf.cu <- runif(iter, 0.2, 0.4)
 TE.fil_h <-rtrunc(iter, "norm", mean=0.34, sd=0.12, a=0, b=1)
 TE.h_fil <-rtrunc(iter, "norm", mean=0.13, sd=0.12, a=0, b=1)
