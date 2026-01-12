@@ -571,7 +571,7 @@ p1<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
   coord_flip()+
   facet_wrap(~scenario, scales="free")+
   labs(x= "Parameter", y="Correlation Strength (|ρ|)")+
-  theme_minimal(base_size=14)
+  theme_bw(base_size=14)
 
 p1
 
@@ -581,7 +581,7 @@ p2<- ggplot(top5_all, aes(x=reorder(variable, abs_corr), y=abs_corr, fill=scenar
   geom_bar (stat="identity", position = position_dodge(width=0.9))+
   coord_flip()+
   labs(x= "Parameter", y="Spearman Correlation Strength (|ρ|)")+
-  theme_minimal(base_size=14)
+  theme_bw(base_size=14)
 
 p2
 ggsave("Top5 parameters_m1.tiff", dpi=600, dev= 'tiff', height=6, width=10, units='in')
