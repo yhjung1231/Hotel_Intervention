@@ -608,7 +608,7 @@ TE.hs <-param$TE.hs
 k.surf<-param$k.surf
 
 
-spear.m2_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
+spear.m2_FD<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.seed, Conc.recover, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
                         LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh)
 # Sample.surfarea, T.surfarea
 
@@ -631,8 +631,8 @@ k.surf<-param$k.surf
 
 
 spear.m2_TT<-data.frame(risk_vec, Conc.h.inf, Conc.h.inf_gc, Conc.recover, Conc.seed, Frac.hf, Frac.hs, gc_PFU, hand_glove, k_gl, k.hand, k.surf, k.surf.cu,
-                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh, T.surfarea )
-#, Sample.surfarea
+                        LR.HS, LR.S, RE.rinse, T.handarea, TE.fil_h, TE.gf, TE.h_fil, TE.hf,TE.hs, TE.sh )
+#, T.surfarea, Sample.surfarea
 
 spear.anal_TT<-cor(spear.m2_TT,method="spearman")
 
