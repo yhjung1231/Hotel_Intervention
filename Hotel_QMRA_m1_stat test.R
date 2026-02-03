@@ -257,21 +257,21 @@ library(FSA)
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E", Scenario %in% c("I4","I6","I8")),
+    filter(Sequence == "E", Scenario %in% c("Baseline","I4","I6","I8")),
   method = "holm"
 )
 
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E_FD", Scenario %in% c("I4","I6","I8")),
+    filter(Sequence == "E_FD", Scenario %in% c("Baseline","I4","I6","I8")),
   method = "holm"
 )
 
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E_TT", Scenario %in% c("I4","I6","I8")),
+    filter(Sequence == "E_TT", Scenario %in% c("Baseline","I4","I6","I8")),
   method = "holm"
 )
 
@@ -281,7 +281,7 @@ I579_tests <- lapply(sequences_to_check, function(seq) {
   out <- kruskal.test(
     Risk ~ Scenario,
     data = risk_df %>%
-      filter(Sequence == seq, Scenario %in% c("I5","I7","I9"))
+      filter(Sequence == seq, Scenario %in% c("Baseline","I5","I7","I9"))
   )
   data.frame(
     Sequence = seq,
@@ -297,23 +297,97 @@ library(FSA)
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E", Scenario %in% c("I5","I7","I9")),
+    filter(Sequence == "E", Scenario %in% c("Baseline","I5","I7","I9")),
   method = "holm"
 )
 
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E_FD", Scenario %in% c("I5","I7","I9")),
+    filter(Sequence == "E_FD", Scenario %in% c("Baseline","I5","I7","I9")),
   method = "holm"
 )
 
 dunnTest(
   Risk ~ Scenario,
   data = risk_df %>%
-    filter(Sequence == "E_TT", Scenario %in% c("I5","I7","I9")),
+    filter(Sequence == "E_TT", Scenario %in% c("Baseline","I5","I7","I9")),
   method = "holm"
 )
+
+#Difference between suscept vs. infected==================================
+
+pairs <-list (c("I4","I5"),
+              c("I6","I7"),
+              c("I8","I9"))
+
+pvals<-sapply(pairs, function(p){
+  wilcox.test(
+    Risk ~ Scenario,
+    data = risk_df %>%
+      filter(Sequence == "E", Scenario %in% p),
+    exact = FALSE
+  ) $p.value
+})
+
+# Holm adjustment
+pvals_adj <-p.adjust(pvals, method="holm")
+
+#Result arrangement
+
+wilcox_results <-data.frame(
+  Comparison = c("I4 vs I5", "I6 vs I7", "I8 vs I9"),
+  p_value_raw = pvals,
+  p_value_adj = pvals_adj
+)
+
+wilcox_results
+#-----------------------------------------
+pvals<-sapply(pairs, function(p){
+  wilcox.test(
+    Risk ~ Scenario,
+    data = risk_df %>%
+      filter(Sequence == "E_FD", Scenario %in% p),
+    exact = FALSE
+  ) $p.value
+})
+
+# Holm adjustment
+pvals_adj <-p.adjust(pvals, method="holm")
+
+#Result arrangement
+
+wilcox_results <-data.frame(
+  Comparison = c("I4 vs I5", "I6 vs I7", "I8 vs I9"),
+  p_value_raw = pvals,
+  p_value_adj = pvals_adj
+)
+
+wilcox_results
+
+#---------------------------------------------
+pvals<-sapply(pairs, function(p){
+  wilcox.test(
+    Risk ~ Scenario,
+    data = risk_df %>%
+      filter(Sequence == "E_TT", Scenario %in% p),
+    exact = FALSE
+  ) $p.value
+})
+
+# Holm adjustment
+pvals_adj <-p.adjust(pvals, method="holm")
+
+#Result arrangement
+
+wilcox_results <-data.frame(
+  Comparison = c("I4 vs I5", "I6 vs I7", "I8 vs I9"),
+  p_value_raw = pvals,
+  p_value_adj = pvals_adj
+)
+
+wilcox_results
+
 
 
 
