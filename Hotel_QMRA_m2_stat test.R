@@ -301,7 +301,7 @@ I579_tests <- lapply(sequences_to_check, function(seq) {
   out <- kruskal.test(
     Risk ~ Scenario,
     data = risk_df %>%
-      filter(Sequence == seq, Scenario %in% c("I5","I7","I9"))
+      filter(Sequence == seq, Scenario %in% c("Baseline","I5","I7","I9"))
   )
   data.frame(
     Sequence = seq,
